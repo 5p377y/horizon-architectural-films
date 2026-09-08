@@ -1,5 +1,6 @@
-// Horizon Architectural Films — shared site behavior
 
+// Horizon Architectural Films — shared site behavior
+ 
 document.addEventListener("DOMContentLoaded", function () {
   // Mobile nav toggle
   var toggle = document.querySelector(".nav-toggle");
@@ -14,47 +15,58 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
-
-  // Contact form: build a pre-filled mailto so submissions land directly in
-  // the business inbox without needing a backend/server.
+ 
+  // Contact form: submit to Formspree via fetch so the visitor stays on the
+  // page and sees an inline success/error message instead of leaving the site.
   var form = document.getElementById("contact-form");
   if (form) {
+    var success = document.getElementById("form-success");
+    var errorBox = document.getElementById("form-error");
+    var submitBtn = form.querySelector('button[type="submit"]');
+ 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-
-      var name = form.name.value.trim();
-      var email = form.email.value.trim();
-      var phone = form.phone.value.trim();
-      var service = form.service.value;
-      var message = form.message.value.trim();
-
-      var subject = "Free Quote Request" + (service ? " — " + service : "");
-      var bodyLines = [
-        "Name: " + name,
-        "Email: " + email,
-        "Phone: " + phone,
-        "Service interested in: " + (service || "Not specified"),
-        "",
-        "Message:",
-        message
-      ];
-      var body = bodyLines.join("\n");
-      var mailto =
-        "mailto:info@horizonarchitecturalfilms.com" +
-        "?subject=" + encodeURIComponent(subject) +
-        "&body=" + encodeURIComponent(body);
-
-      window.location.href = mailto;
-
-      var success = document.getElementById("form-success");
-      if (success) {
-        success.classList.add("show");
-        success.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (success) success.classList.remove("show");
+      if (errorBox) errorBox.classList.remove("show");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
       }
-      form.reset();
+ 
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" }
+      })
+        .then(function (response) {
+          if (response.ok) {
+            if (success) {
+              success.classList.add("show");
+              success.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+            form.reset();
+          } else {
+            if (errorBox) {
+              errorBox.classList.add("show");
+              errorBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+          }
+        })
+        .catch(function () {
+          if (errorBox) {
+            errorBox.classList.add("show");
+            errorBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        })
+        .finally(function () {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Request";
+          }
+        });
     });
   }
-
+ 
   // Footer year
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
