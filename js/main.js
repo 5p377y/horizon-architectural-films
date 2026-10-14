@@ -8,12 +8,28 @@ document.addEventListener("DOMContentLoaded", function () {
     toggle.addEventListener("click", function () {
       links.classList.toggle("open");
     });
-    links.querySelectorAll("a").forEach(function (a) {
+    links.querySelectorAll("a:not(.dropdown-parent)").forEach(function (a) {
       a.addEventListener("click", function () {
         links.classList.remove("open");
       });
     });
   }
+
+  // Mega-menu dropdowns (Residential / Commercial): mobile tap-to-expand.
+  // Desktop opens on hover via CSS; the toggle button only matters at
+  // mobile widths where hover doesn't apply.
+  document.querySelectorAll(".dropdown-toggle").forEach(function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      var li = btn.closest(".has-dropdown");
+      if (!li) return;
+      var isOpen = li.classList.contains("open");
+      document.querySelectorAll(".has-dropdown.open").forEach(function (other) {
+        if (other !== li) other.classList.remove("open");
+      });
+      li.classList.toggle("open", !isOpen);
+    });
+  });
  
   // Contact form: submit to Formspree via fetch so the visitor stays on the
   // page and sees an inline success/error message instead of leaving the site.
