@@ -213,24 +213,41 @@ p { margin: 0 0 16px; color: var(--gray-600); }
 .dropdown-parent .caret { width: 11px; height: 11px; color: var(--gray-500); transition: transform var(--transition); flex-shrink: 0; }
 .has-dropdown:hover .dropdown-parent .caret { color: var(--blue-500); }
 
+/* The outer .dropdown-menu sits flush against the parent link (top: 100%,
+   no gap) so the hoverable area is continuous from link to menu — the
+   14px of breathing room is pushed inside as padding-top instead of a
+   margin/offset, so the cursor never leaves a hovered element while
+   moving from the "Residential"/"Commercial" link down into the menu. */
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 14px);
+  top: 100%;
   left: 50%;
   transform: translateX(-50%);
+  padding-top: 14px;
+  min-width: 260px;
+  display: none;
+  z-index: 200;
+}
+/* Hover/focus-within only opens the menu on devices that actually hover
+   (desktop). On mobile this must stay out of the cascade entirely —
+   otherwise the toggle button keeps :focus-within true after a tap and
+   the menu can never be collapsed again, since the "open" class alone
+   wouldn't control visibility. */
+@media (min-width: 901px) {
+  .has-dropdown:hover .dropdown-menu,
+  .has-dropdown:focus-within .dropdown-menu { display: block; }
+}
+
+.dropdown-menu-inner {
   background: var(--white);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--gray-200);
   padding: 10px;
-  min-width: 260px;
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 2px;
-  z-index: 200;
 }
-.has-dropdown:hover .dropdown-menu,
-.has-dropdown:focus-within .dropdown-menu { display: flex; }
 
 .dropdown-item {
   display: block;
@@ -272,13 +289,20 @@ p { margin: 0 0 16px; color: var(--gray-600); }
     position: static;
     display: none;
     transform: none;
-    box-shadow: none;
-    border: none;
-    padding: 6px 0 0 14px;
+    padding-top: 0;
     min-width: 0;
     width: 100%;
   }
-  .has-dropdown.open .dropdown-menu { display: flex; }
+  .has-dropdown.open .dropdown-menu { display: block; }
+  .dropdown-menu-inner {
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 6px 0 0 14px;
+    display: flex;
+    flex-direction: column;
+  }
   .dropdown-item { padding: 10px 0; color: var(--gray-600); }
 }
 
@@ -478,6 +502,8 @@ p { margin: 0 0 16px; color: var(--gray-600); }
 .split img { border-radius: var(--radius); box-shadow: var(--shadow-md); width: 100%; height: auto; }
 @media (max-width: 900px) {
   .split { grid-template-columns: 1fr; }
+  .split .btn-row { justify-content: center; }
+  .split .btn-row .btn { text-align: center; }
 }
 
 /* Caps display width for lower-resolution source photos so they aren't
